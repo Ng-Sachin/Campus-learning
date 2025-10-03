@@ -1,58 +1,54 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { 
   Home,
-  User,
+  Target,
+  TrendingUp,
   Users,
-  BarChart3,
-  Settings,
+  Shield,
   LogOut,
   Menu,
   X,
-  Bell
+  User,
+  ChevronDown,
+  Calendar,
+  Mail,
+  UserCircle
 } from 'lucide-react';
-
 
 interface NavItem {
   label: string;
   path: string;
   icon: React.ComponentType<any>;
   adminOnly?: boolean;
+  mobileLabel?: string;
 }
 
 const navigationItems: NavItem[] = [
   {
     label: 'Dashboard',
-    path: '/dashboard',
+    mobileLabel: 'Home',
+    path: '/student/dashboard',
     icon: Home
   },
   {
     label: 'Goals & Reflections',
+    mobileLabel: 'Goals',
     path: '/goals',
-    icon: BarChart3
+    icon: Target
   },
   {
-    label: 'Learning Journey',
+    label: 'Journey',
+    mobileLabel: 'Journey',
     path: '/journey',
-    icon: User
+    icon: TrendingUp
   },
   {
-    label: 'Mentor Dashboard',
+    label: 'Mentor',
+    mobileLabel: 'Mentor',
     path: '/mentor/dashboard',
     icon: Users
-  },
-  {
-    label: 'Campus Overview',
-    path: '/campus',
-    icon: BarChart3,
-    adminOnly: true
-  },
-  {
-    label: 'Settings',
-    path: '/settings',
-    icon: Settings,
-    adminOnly: true
   }
 ];
 
@@ -68,6 +64,8 @@ const Navigation: React.FC<NavigationProps> = ({
   const { userData, signOut } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleSignOut = async () => {
     try {
@@ -78,170 +76,355 @@ const Navigation: React.FC<NavigationProps> = ({
     }
   };
 
-  const filteredNavItems = navigationItems.filter(item => 
-    !item.adminOnly || (userData && userData.isAdmin)
-  );
+  // Check if we're in admin section
+  const isAdminSection = location.pathname.startsWith('/admin');
+  
+  // All users see the same navigation items
+  const filteredNavItems = navigationItems;
 
-  const isActive = (path: string) => location.pathname === path;
+  const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
 
   return (
     <>
-      {/* Mobile Header */}
-      <div className="lg:hidden bg-white shadow-sm border-b border-gray-200 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-          <h1 className="text-xl font-semibold text-gray-900">Campus Learning</h1>
-        </div>
-        
-        <div className="flex items-center space-x-3">
-          <button className="p-2 text-gray-600 hover:text-gray-900">
-            <Bell size={20} />
-          </button>
-          <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
-            <span className="text-sm font-medium text-primary-600">
-              {userData?.name.charAt(0).toUpperCase()}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Desktop Sidebar */}
-      <div className="hidden lg:flex lg:flex-col lg:w-64 lg:fixed lg:inset-y-0 lg:bg-white lg:border-r lg:border-gray-200">
-        <div className="flex flex-col flex-grow pt-5 pb-4 overflow-y-auto">
-          <div className="flex items-center flex-shrink-0 px-4">
-            <h1 className="text-xl font-semibold text-gray-900">Campus Learning</h1>
-          </div>
-          
-          <div className="mt-8 flex-grow flex flex-col">
-            <nav className="flex-1 px-2 space-y-1">
-              {filteredNavItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                      isActive(item.path)
-                        ? 'bg-primary-100 text-primary-900'
-                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                    }`}
-                  >
-                    <Icon
-                      className={`mr-3 flex-shrink-0 h-5 w-5 ${
-                        isActive(item.path) ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
-                      }`}
-                    />
-                    {item.label}
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-
-          {/* User Profile Section */}
-          <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-            <div className="flex-shrink-0 w-full group block">
-              <div className="flex items-center">
-                <div className="w-9 h-9 bg-primary-100 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-primary-600">
-                    {userData?.name.charAt(0).toUpperCase()}
+      {/* Top Navigation Bar - Desktop & Mobile */}
+      <nav className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo and Brand */}
+            <div className="flex items-center space-x-8">
+              <div className="flex-shrink-0">
+                <Link to="/dashboard" className="flex items-center space-x-2">
+                  <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">CL</span>
+                  </div>
+                  <span className="hidden sm:block text-lg font-semibold text-gray-900">
+                    Campus Learning
                   </span>
-                </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-sm font-medium text-gray-700 group-hover:text-gray-900">
-                    {userData?.name}
-                  </p>
-                  <p className="text-xs font-medium text-gray-500 group-hover:text-gray-700">
-                    {userData?.isAdmin ? 'Admin' : ''}
-                  </p>
-                </div>
-                <button
-                  onClick={handleSignOut}
-                  className="ml-3 p-1 text-gray-400 hover:text-gray-600"
-                  title="Sign Out"
-                >
-                  <LogOut size={16} />
-                </button>
+                </Link>
               </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
-      {/* Mobile Menu Overlay */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden fixed inset-0 flex z-40">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setIsMobileMenuOpen(false)} />
-          
-          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white">
-            <div className="absolute top-0 right-0 -mr-12 pt-2">
-              <button
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="ml-1 flex items-center justify-center h-10 w-10 rounded-full focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
-              >
-                <X className="h-6 w-6 text-white" />
-              </button>
-            </div>
-
-            <div className="flex-1 h-0 pt-5 pb-4 overflow-y-auto">
-              <div className="flex-shrink-0 flex items-center px-4">
-                <h1 className="text-xl font-semibold text-gray-900">Campus Learning</h1>
-              </div>
-              <nav className="mt-5 flex-1 px-2 space-y-1">
+              {/* Desktop Navigation */}
+              <div className="hidden md:flex items-center space-x-1">
                 {filteredNavItems.map((item) => {
                   const Icon = item.icon;
                   return (
                     <Link
                       key={item.path}
                       to={item.path}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`group flex items-center px-2 py-2 text-base font-medium rounded-md ${
+                      className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                         isActive(item.path)
-                          ? 'bg-primary-100 text-primary-900'
-                          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                          ? 'bg-primary-50 text-primary-700'
+                          : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
                       }`}
                     >
-                      <Icon
-                        className={`mr-4 flex-shrink-0 h-6 w-6 ${
-                          isActive(item.path) ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
-                        }`}
-                      />
+                      <Icon className="h-4 w-4 mr-2" />
                       {item.label}
                     </Link>
                   );
                 })}
-              </nav>
+              </div>
             </div>
 
-            {/* Mobile User Profile */}
-            <div className="flex-shrink-0 flex border-t border-gray-200 p-4">
-              <div className="flex items-center w-full">
-                <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                  <span className="text-sm font-medium text-primary-600">
-                    {userData?.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <div className="ml-3 flex-1">
-                  <p className="text-base font-medium text-gray-700">
-                    {userData?.name}
-                  </p>
-                  <p className="text-sm font-medium text-gray-500">
-                    {userData?.isAdmin ? 'Admin' : ''}
-                  </p>
+            {/* Right Side - User Profile */}
+            <div className="flex items-center space-x-4">
+              {/* Admin View Toggle Button (Desktop) */}
+              {userData?.isAdmin && (
+                <button
+                  onClick={() => navigate(isAdminSection ? '/student/dashboard' : '/admin/dashboard')}
+                  className="hidden md:flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium shadow-sm"
+                >
+                  {isAdminSection ? (
+                    <>
+                      <UserCircle size={18} />
+                      <span>Student View</span>
+                    </>
+                  ) : (
+                    <>
+                      <Shield size={18} />
+                      <span>Admin View</span>
+                    </>
+                  )}
+                </button>
+              )}
+              
+              {/* Desktop User Menu */}
+              <div className="hidden md:flex items-center space-x-3 relative">
+                <button
+                  onClick={() => setShowUserMenu(!showUserMenu)}
+                  className="flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors"
+                >
+                  <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-medium text-primary-700">
+                      {userData?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <div className="text-sm text-left">
+                    <p className="font-medium text-gray-700">{userData?.name}</p>
+                    {userData?.isAdmin && (
+                      <p className="text-xs text-gray-500">Admin</p>
+                    )}
+                  </div>
+                  <ChevronDown size={16} className="text-gray-500" />
+                </button>
+
+                {/* User Dropdown Menu */}
+                {showUserMenu && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-10" 
+                      onClick={() => setShowUserMenu(false)}
+                    />
+                    <div className="absolute right-0 top-12 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-20">
+                      <div className="px-4 py-3 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900">{userData?.name}</p>
+                        <p className="text-xs text-gray-500 mt-1">{userData?.email}</p>
+                        {userData?.isAdmin && (
+                          <span className="inline-block mt-2 px-2 py-1 text-xs font-medium bg-primary-100 text-primary-700 rounded">
+                            Admin
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          setShowProfileModal(true);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                      >
+                        <User size={16} />
+                        <span>View Profile</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          handleSignOut();
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center space-x-3"
+                      >
+                        <LogOut size={16} />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+
+              {/* Mobile Menu Button */}
+              <button
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              >
+                {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Dropdown Menu */}
+        {isMobileMenuOpen && (
+          <div className="md:hidden border-t border-gray-200 bg-white shadow-lg">
+            <div className="px-2 pt-2 pb-3 space-y-1">
+              {filteredNavItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setIsMobileMenuOpen(false)}
+                    className={`flex items-center px-3 py-2 rounded-md text-base font-medium ${
+                      isActive(item.path)
+                        ? 'bg-primary-50 text-primary-700'
+                        : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    <Icon className="h-5 w-5 mr-3" />
+                    {item.label}
+                  </Link>
+                );
+              })}
+              
+              {/* Admin View Toggle (Mobile) */}
+              {userData?.isAdmin && (
+                <button
+                  onClick={() => {
+                    navigate(isAdminSection ? '/student/dashboard' : '/admin/dashboard');
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center px-3 py-2 text-base font-medium bg-primary-600 text-white hover:bg-primary-700 rounded-md mb-2"
+                >
+                  {isAdminSection ? (
+                    <>
+                      <UserCircle className="h-5 w-5 mr-3" />
+                      Student View
+                    </>
+                  ) : (
+                    <>
+                      <Shield className="h-5 w-5 mr-3" />
+                      Admin View
+                    </>
+                  )}
+                </button>
+              )}
+              
+              {/* Mobile User Section */}
+              <div className="border-t border-gray-200 pt-3 mt-3">
+                <div className="flex items-center px-3 py-2">
+                  <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-medium text-primary-700">
+                      {userData?.name?.charAt(0)?.toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <p className="text-base font-medium text-gray-700">{userData?.name}</p>
+                    <p className="text-sm text-gray-500">{userData?.email}</p>
+                    {userData?.isAdmin && (
+                      <p className="text-xs text-primary-600 font-medium">Admin</p>
+                    )}
+                  </div>
                 </div>
                 <button
-                  onClick={handleSignOut}
-                  className="ml-3 p-2 text-gray-400 hover:text-gray-600"
-                  title="Sign Out"
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    setShowProfileModal(true);
+                  }}
+                  className="w-full flex items-center px-3 py-2 text-base font-medium text-gray-700 hover:bg-gray-100 rounded-md mt-2"
                 >
-                  <LogOut size={20} />
+                  <User className="h-5 w-5 mr-3" />
+                  View Profile
+                </button>
+                <button
+                  onClick={() => {
+                    handleSignOut();
+                    setIsMobileMenuOpen(false);
+                  }}
+                  className="w-full flex items-center px-3 py-2 text-base font-medium text-red-600 hover:bg-red-50 rounded-md mt-2"
+                >
+                  <LogOut className="h-5 w-5 mr-3" />
+                  Sign Out
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+      </nav>
+
+      {/* Mobile Bottom Navigation (Instagram/YouTube style) */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-lg z-30">
+        <div className="flex justify-around items-center h-16">
+          {filteredNavItems.slice(0, 5).map((item) => {
+            const Icon = item.icon;
+            const active = isActive(item.path);
+            return (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={`flex flex-col items-center justify-center flex-1 h-full space-y-1 ${
+                  active ? 'text-primary-600' : 'text-gray-600'
+                }`}
+              >
+                <Icon className={`h-6 w-6 ${active ? 'stroke-2' : 'stroke-1'}`} />
+                <span className={`text-xs ${active ? 'font-semibold' : 'font-normal'}`}>
+                  {item.mobileLabel || item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Profile Modal */}
+      {showProfileModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold text-gray-900">Profile</h2>
+                <button
+                  onClick={() => setShowProfileModal(false)}
+                  className="p-1 hover:bg-gray-100 rounded-md transition-colors"
+                >
+                  <X size={20} className="text-gray-500" />
+                </button>
+              </div>
+            </div>
+            
+            <div className="p-6">
+              <div className="flex flex-col items-center mb-6">
+                <div className="w-20 h-20 bg-primary-100 rounded-full flex items-center justify-center mb-3">
+                  <span className="text-3xl font-medium text-primary-700">
+                    {userData?.name?.charAt(0)?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900">{userData?.name}</h3>
+                {userData?.isAdmin && (
+                  <span className="mt-2 px-3 py-1 text-sm font-medium bg-primary-100 text-primary-700 rounded-full">
+                    Administrator
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <Mail size={20} className="text-gray-600 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-500 uppercase">Email</p>
+                    <p className="text-sm text-gray-900 mt-1">{userData?.email}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <UserCircle size={20} className="text-gray-600 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-500 uppercase">User ID</p>
+                    <p className="text-sm text-gray-900 mt-1 break-all">{userData?.id}</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                  <Calendar size={20} className="text-gray-600 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-xs font-medium text-gray-500 uppercase">Date Joined</p>
+                    <p className="text-sm text-gray-900 mt-1">
+                      {userData?.created_at 
+                        ? new Date(userData.created_at).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                          })
+                        : 'N/A'}
+                    </p>
+                  </div>
+                </div>
+
+                {userData?.isAdmin && (
+                  <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <Shield size={20} className="text-gray-600 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-gray-500 uppercase">Role</p>
+                      <p className="text-sm text-gray-900 mt-1">Administrator</p>
+                    </div>
+                  </div>
+                )}
+
+                {userData?.mentor_id && (
+                  <div className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <Users size={20} className="text-gray-600 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-gray-500 uppercase">Mentor</p>
+                      <p className="text-sm text-gray-900 mt-1">{userData.mentor_id}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-6 bg-gray-50 border-t border-gray-200 rounded-b-lg">
+              <button
+                onClick={() => setShowProfileModal(false)}
+                className="w-full px-4 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 transition-colors font-medium"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

@@ -103,25 +103,33 @@ function App() {
             {/* Mentor Routes */}
             <Route path="/mentor/dashboard" element={
               <ProtectedRoute>
-                <MentorDashboard />
+                <Layout>
+                  <MentorDashboard />
+                </Layout>
               </ProtectedRoute>
             } />
 
             <Route path="/mentor/mentee/:studentId" element={
               <ProtectedRoute>
-                <MentorMenteeReview />
+                <Layout>
+                  <MentorMenteeReview />
+                </Layout>
               </ProtectedRoute>
             } />
 
             <Route path="/mentor/review/:studentId" element={
               <ProtectedRoute>
-                <MentorMenteeReview />
+                <Layout>
+                  <MentorMenteeReview />
+                </Layout>
               </ProtectedRoute>
             } />
 
             <Route path="/mentor/pair-programming" element={
               <ProtectedRoute>
-                <PairProgrammingManagement />
+                <Layout>
+                  <PairProgrammingManagement />
+                </Layout>
               </ProtectedRoute>
             } />
 

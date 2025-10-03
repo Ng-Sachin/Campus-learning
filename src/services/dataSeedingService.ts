@@ -6,12 +6,11 @@ export class DataSeedingService {
     try {
       console.log('Starting data seeding...');
       
-      // Check if phases already exist
+      // Get existing phases to check what's already seeded
       const existingPhases = await PhaseService.getAllPhases();
-      if (existingPhases.length > 0) {
-        console.log('Phases already exist, skipping seeding');
-        return true;
-      }
+      const existingPhaseNames = existingPhases.map(p => p.name);
+      
+      console.log('Existing phases:', existingPhaseNames);
 
       // Import all phase/topic files
       const phaseFiles = [
@@ -23,11 +22,17 @@ export class DataSeedingService {
         require('../data/phase7Topics')
       ];
 
-      // Seed all phases and topics
+      // Seed all phases and topics (skip if already exists)
       for (const phaseFile of phaseFiles) {
         // For initialData, use initialPhases and detailedTopics
         if (phaseFile.initialPhases && phaseFile.detailedTopics) {
           for (const phaseData of phaseFile.initialPhases) {
+            // Check if phase already exists
+            if (existingPhaseNames.includes(phaseData.name)) {
+              console.log(`Phase already exists, skipping: ${phaseData.name}`);
+              continue;
+            }
+            
             const phaseId = await PhaseService.createPhase({
               ...phaseData,
               created_at: new Date()
@@ -56,6 +61,12 @@ export class DataSeedingService {
         ];
         for (const { arr, name, order } of phaseMap) {
           if (arr && arr.length > 0) {
+            // Check if phase already exists
+            if (existingPhaseNames.includes(name)) {
+              console.log(`Phase already exists, skipping: ${name}`);
+              continue;
+            }
+            
             const phaseData = {
               name,
               start_date: new Date(),
@@ -64,6 +75,7 @@ export class DataSeedingService {
               created_at: new Date()
             };
             const phaseId = await PhaseService.createPhase(phaseData);
+            console.log(`Created phase: ${name}`);
             for (const topicData of arr) {
               await TopicService.createTopic({
                 ...topicData,

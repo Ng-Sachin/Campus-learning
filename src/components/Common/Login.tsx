@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
@@ -6,18 +6,32 @@ const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const { signInWithGoogle } = useAuth();
+  const { signInWithGoogle, currentUser, userData } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   const from = location.state?.from?.pathname || '/dashboard';
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (currentUser && userData) {
+      navigate(from, { replace: true });
+    }
+  }, [currentUser, userData, navigate, from]);
+
   const handleGoogleSignIn = async () => {
     try {
       setError('');
       setLoading(true);
-      await signInWithGoogle();
-      navigate(from, { replace: true });
+      const user = await signInWithGoogle();
+      
+      // Wait a bit for user data to be loaded
+      if (user) {
+        // Small delay to ensure userData is loaded in context
+        setTimeout(() => {
+          navigate(from, { replace: true });
+        }, 500);
+      }
     } catch (error: any) {
       console.error('Google sign in error:', error);
       
@@ -28,7 +42,6 @@ const Login: React.FC = () => {
       }
       
       setError('Failed to sign in with Google. Please try again.');
-    } finally {
       setLoading(false);
     }
   };

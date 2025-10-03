@@ -15,233 +15,109 @@ export interface TopicDetails {
 // Initial phases for the campus learning program
 export const initialPhases: Omit<Phase, 'id' | 'created_at'>[] = [
   {
-    name: 'Phase 0: Foundation - Math',
+    name: 'Phase 0: Foundation',
     start_date: new Date('2024-09-01'),
-    end_date: new Date('2024-09-07'),
-    order: 0
-  },
-  {
-    name: 'Phase 0: Foundation - Number Systems',
-    start_date: new Date('2024-09-08'),
-    end_date: new Date('2024-09-21'),
-    order: 1
-  },
-  {
-    name: 'Phase 0: Foundation - Problem Solving using Flowcharts',
-    start_date: new Date('2024-09-22'),
     end_date: new Date('2024-10-26'),
-    order: 2
+    order: 0
   },
   {
     name: 'Phase 1: Student Profile & Course Portal (HTML Only)',
     start_date: new Date('2024-10-27'),
     end_date: new Date('2024-11-30'),
-    order: 3
+    order: 1
   },
   {
     name: 'Phase 2: Styling & Responsive Design',
     start_date: new Date('2024-12-01'),
     end_date: new Date('2024-12-31'),
-    order: 4
+    order: 2
   }
 ];
 
 // Detailed topic information with project specifications
 export const detailedTopics: { [phaseName: string]: TopicDetails[] } = {
-  'Phase 0: Foundation - Math': [
+  'Phase 0: Foundation': [
     {
-      name: 'BODMAS & Order of Operations',
+      name: 'Mathematics Fundamentals',
       order: 1,
-      maxTime: 120,
-      keyTags: ['BODMAS', 'Mathematical Operations', 'Problem Solving'],
-      deliverable: 'Complete Khan Academy exercises on BODMAS',
+      maxTime: 600,
+      keyTags: ['BODMAS', 'Algebra', 'Exponents', 'Number Theory', 'Mathematical Operations'],
+      deliverable: 'Complete Khan Academy Math Module and pass Module 0 Assessment',
       icon: '🔢',
-      technologies: ['Mathematics', 'Problem Solving'],
-      description: '1-week primer to strengthen math foundation. Learn BODMAS (Brackets, Orders, Division/Multiplication, Addition/Subtraction) and practice order of operations essential for programming logic.'
+      technologies: ['Mathematics', 'Problem Solving', 'Khan Academy'],
+      description: `1-week intensive math primer to strengthen foundation for programming logic.
+
+**Topics Covered:**
+• BODMAS & Order of Operations - Learn the fundamental rules for evaluating mathematical expressions
+• Number Types & Properties - Understanding even/odd, prime, composite, and natural numbers
+• Division & Number Operations - Master long division, HCF (Highest Common Factor), and LCM (Lowest Common Multiple)
+• Basic Algebra - Introduction to variables, equations, and algebraic expressions
+• Basic Exponents - Understanding powers and exponential notation
+
+**Key Learning Outcomes:**
+- Apply BODMAS rules to solve complex expressions
+- Classify and work with different number types
+- Perform division operations and find HCF/LCM
+- Work with variables and solve simple equations
+- Understand and calculate exponents
+
+**Assessment:** Complete all Khan Academy exercises and pass the Module 0 test to demonstrate mastery of mathematical fundamentals essential for programming.`
     },
     {
-      name: 'Number Types & Properties',
+      name: 'Number Systems & Binary Logic',
       order: 2,
-      maxTime: 120,
-      keyTags: ['Even/Odd Numbers', 'Prime Numbers', 'Composite Numbers', 'Natural Numbers'],
-      deliverable: 'Complete number classification exercises',
-      icon: '🔢',
-      technologies: ['Mathematics', 'Number Theory'],
-      description: 'Understand different types of numbers: Even/Odd, Prime, Composite, and Natural numbers. Essential for understanding data types in programming.'
-    },
-    {
-      name: 'Division & Number Operations',
-      order: 3,
-      maxTime: 120,
-      keyTags: ['Long Division', 'HCF', 'LCM', 'Number Operations'],
-      deliverable: 'Complete division and HCF/LCM exercises',
-      icon: '➗',
-      technologies: ['Mathematics', 'Arithmetic'],
-      description: 'Master long division, finding HCF (Highest Common Factor) and LCM (Lowest Common Multiple). Build foundation for algorithmic thinking.'
-    },
-    {
-      name: 'Basic Algebra',
-      order: 4,
-      maxTime: 120,
-      keyTags: ['Variables', 'Equations', 'Algebraic Expressions'],
-      deliverable: 'Complete basic algebra exercises',
-      icon: '📐',
-      technologies: ['Algebra', 'Variables'],
-      description: 'Introduction to variables and algebraic expressions. Understand how to work with unknowns and solve simple equations - direct preparation for programming variables.'
-    },
-    {
-      name: 'Basic Exponents',
-      order: 5,
-      maxTime: 120,
-      keyTags: ['Powers', 'Exponents', 'Mathematical Notation'],
-      deliverable: 'Complete exponent exercises',
-      icon: '📊',
-      technologies: ['Mathematics', 'Exponents'],
-      description: 'Learn exponents and powers. Understanding exponential growth is essential for computational complexity and algorithm analysis.'
-    },
-    {
-      name: 'Module 0 Assessment',
-      order: 6,
-      maxTime: 60,
-      keyTags: ['Assessment', 'Review', 'Self-paced'],
-      deliverable: 'Pass Module 0 test',
-      icon: '✅',
-      technologies: ['Khan Academy', 'Self-assessment'],
-      description: 'Final assessment covering all math fundamentals. Sign in to Khan Academy and complete the Module 0 test to demonstrate understanding.'
-    }
-  ],
-  'Phase 0: Foundation - Number Systems': [
-    {
-      name: 'Introduction to Number Systems',
-      order: 1,
-      maxTime: 180,
-      keyTags: ['Binary', 'Decimal', 'Number Systems', 'Base Systems'],
-      deliverable: 'Complete number systems introduction exercises',
+      maxTime: 960,
+      keyTags: ['Binary', 'Decimal', 'Number Systems', 'Base Conversion', 'Computer Fundamentals'],
+      deliverable: 'Complete number systems exercises and participate in facilitation session',
       icon: '💻',
-      technologies: ['Computer Science', 'Number Systems'],
-      description: 'Understanding binary and number system concepts to build familiarity with how computers operate. Learn the difference between decimal (base 10) and binary (base 2) systems.'
+      technologies: ['Binary Systems', 'Computer Science', 'Number Theory'],
+      description: `2-week deep dive into number systems - the language computers speak.
+
+**Topics Covered:**
+• Introduction to Number Systems - Understanding different base systems (binary, decimal, octal, hexadecimal)
+• Binary Numbers & Representation - How computers represent data using only 0s and 1s
+• Base Conversions - Converting between decimal, binary, octal, and hexadecimal systems
+• Adding Numbers in Different Bases - Arithmetic operations in binary and other bases
+• Fun Facilitation Session - Interactive mentor-led activities to solidify concepts
+
+**Key Learning Outcomes:**
+- Understand how computers process and store information
+- Convert numbers between different base systems (binary ↔ decimal ↔ hex)
+- Perform binary arithmetic operations
+- Grasp the relationship between bits, bytes, and computer memory
+- Apply number system concepts to real-world computing scenarios
+
+**Activities:** Daily exercises, base conversion practice, binary addition problems, and interactive mentor session with group discussions and reflections on Moodle.`
     },
     {
-      name: 'Binary Numbers & Representation',
-      order: 2,
-      maxTime: 240,
-      keyTags: ['Binary', 'Bits', 'Digital Logic', 'Base 2'],
-      deliverable: 'Binary conversion exercises and daily reflection',
-      icon: '0️⃣1️⃣',
-      technologies: ['Binary Systems', 'Computer Fundamentals'],
-      description: 'Deep dive into binary numbers - the language of computers. Learn how to represent numbers using only 0s and 1s, fundamental to all computing.'
-    },
-    {
-      name: 'Base Conversions',
+      name: 'Problem Solving & Flowcharts',
       order: 3,
-      maxTime: 240,
-      keyTags: ['Base Conversion', 'Decimal to Binary', 'Binary to Decimal'],
-      deliverable: 'Complete base conversion exercises',
-      icon: '🔄',
-      technologies: ['Number Systems', 'Conversions'],
-      description: 'Master converting between different number bases (binary, decimal, octal, hexadecimal). Essential for understanding computer memory and data representation.'
-    },
-    {
-      name: 'Adding Numbers in Different Bases',
-      order: 4,
-      maxTime: 180,
-      keyTags: ['Binary Addition', 'Base Operations', 'Carry Operations'],
-      deliverable: 'Complete addition exercises in multiple bases',
-      icon: '➕',
-      technologies: ['Binary Arithmetic', 'Number Systems'],
-      description: 'Conceptual understanding of adding numbers in different bases. Learn how computers perform arithmetic operations at the hardware level.'
-    },
-    {
-      name: 'Fun Facilitation Session',
-      order: 5,
-      maxTime: 120,
-      keyTags: ['Interactive Learning', 'Group Discussion', 'Mentor Session'],
-      deliverable: 'Participate in mentor-led session and submit reflection',
-      icon: '🎯',
-      technologies: ['Collaborative Learning', 'Moodle'],
-      description: 'Fun facilitation session with mentor. Engage in interactive activities to solidify number systems concepts. Daily reflection required.'
-    }
-  ],
-  'Phase 0: Foundation - Problem Solving using Flowcharts': [
-    {
-      name: 'Introduction to Problem Solving',
-      order: 1,
-      maxTime: 180,
-      keyTags: ['Problem Analysis', 'Logical Thinking', 'Breaking Down Problems'],
-      deliverable: 'Complete problem analysis exercises',
-      icon: '🧩',
-      technologies: ['Problem Solving', 'Computational Thinking'],
-      description: 'Learn to break down complex problems into manageable steps. Introduction to systematic problem-solving approaches essential for programming.'
-    },
-    {
-      name: 'Variables & Data',
-      order: 2,
-      maxTime: 240,
-      keyTags: ['Variables', 'Data Types', 'Storage Concepts'],
-      deliverable: 'Complete variable exercises and flowchart practice',
-      icon: '📦',
-      technologies: ['Variables', 'Programming Concepts'],
-      description: 'Understand what variables are and how they store data. Learn to identify when and how to use variables in problem-solving - preparation for actual programming.'
-    },
-    {
-      name: 'Loops & Repetition',
-      order: 3,
-      maxTime: 300,
-      keyTags: ['Loops', 'Iteration', 'Repetition', 'Control Flow'],
-      deliverable: 'Complete loop flowchart exercises',
-      icon: '🔁',
-      technologies: ['Loops', 'Control Structures'],
-      description: 'Introduction to loops and repetitive processes. Learn how to represent repeated actions in flowcharts - fundamental for efficient programming.'
-    },
-    {
-      name: 'Mathematical Logic',
-      order: 4,
-      maxTime: 240,
-      keyTags: ['Logic', 'Conditions', 'Decision Making', 'Boolean Logic'],
-      deliverable: 'Complete logic and decision-making exercises',
-      icon: '🤔',
-      technologies: ['Logic', 'Conditional Thinking'],
-      description: 'Learn mathematical logic and conditional thinking. Understand how to make decisions in problem-solving using if-then-else logic.'
-    },
-    {
-      name: 'Flowchart Design Basics',
-      order: 5,
-      maxTime: 300,
-      keyTags: ['Flowcharts', 'Visual Logic', 'Symbols', 'Flow'],
-      deliverable: 'Create basic flowcharts for simple problems',
+      maxTime: 1680,
+      keyTags: ['Flowcharts', 'Problem Solving', 'Algorithms', 'Logic', 'Computational Thinking'],
+      deliverable: 'Create flowcharts for complex problems and pass Module 2 Assessment',
       icon: '📊',
-      technologies: ['Flowcharts', 'Visual Programming'],
-      description: 'Master flowchart symbols and conventions. Learn to visually represent problem-solving steps using standard flowchart notation.'
-    },
-    {
-      name: 'Advanced Flowchart Design',
-      order: 6,
-      maxTime: 360,
-      keyTags: ['Complex Flowcharts', 'Nested Logic', 'Multiple Paths'],
-      deliverable: 'Create flowcharts for complex problems',
-      icon: '🎨',
-      technologies: ['Advanced Flowcharts', 'Problem Solving'],
-      description: 'Design flowcharts for more complex problems involving multiple conditions, loops, and decision paths. Practice sessions with mentor.'
-    },
-    {
-      name: 'Problem-Solving Practice',
-      order: 7,
-      maxTime: 480,
-      keyTags: ['Practice', 'Real Problems', 'Application'],
-      deliverable: 'Complete problem-solving challenges',
-      icon: '💪',
-      technologies: ['Applied Problem Solving', 'Flowcharts'],
-      description: 'Daily practice sessions solving real-world problems using flowcharts. Individual gap analysis with facilitator to identify areas for improvement.'
-    },
-    {
-      name: 'Module 2 Review & Assessment',
-      order: 8,
-      maxTime: 120,
-      keyTags: ['Assessment', 'Review', 'Comprehensive Test'],
-      deliverable: 'Pass Module 2 assessment',
-      icon: '✅',
-      technologies: ['Moodle', 'Self-assessment'],
-      description: 'Final comprehensive assessment covering all problem-solving and flowchart concepts. Demonstrate ability to analyze problems and design solutions.'
+      technologies: ['Flowcharts', 'Algorithmic Thinking', 'Visual Programming'],
+      description: `5-week intensive program to master systematic problem-solving using flowcharts.
+
+**Topics Covered:**
+• Introduction to Problem Solving - Breaking down complex problems into manageable steps
+• Variables & Data - Understanding data storage and manipulation concepts
+• Loops & Repetition - Representing iterative processes visually
+• Mathematical Logic - Boolean logic and conditional decision-making
+• Flowchart Design Basics - Mastering flowchart symbols and conventions
+• Advanced Flowchart Design - Complex problems with nested logic and multiple paths
+• Problem-Solving Practice - Daily practice with real-world challenges
+• Module 2 Review & Assessment - Comprehensive test of all concepts
+
+**Key Learning Outcomes:**
+- Analyze problems systematically and identify solution steps
+- Design clear flowcharts using standard notation and symbols
+- Represent variables, loops, and conditions visually
+- Apply boolean logic to decision-making processes
+- Create flowcharts for complex, multi-step problems
+- Translate real-world problems into algorithmic solutions
+
+**Activities:** Daily practice sessions, individual gap analysis with facilitators, mentor-guided problem-solving workshops, and comprehensive final assessment demonstrating mastery of computational thinking and flowchart design.`
     }
   ],
   'Phase 1: Student Profile & Course Portal (HTML Only)': [

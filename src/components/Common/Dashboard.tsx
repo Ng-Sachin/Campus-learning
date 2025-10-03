@@ -17,12 +17,8 @@ const Dashboard: React.FC = () => {
     return <Navigate to="/login" replace />;
   }
 
-  // Redirect based on admin status
-  if (userData.isAdmin) {
-    return <Navigate to="/admin/dashboard" replace />;
-  }
-  
-  // For non-admin users, redirect to student dashboard by default
+  // Redirect all users to student dashboard by default
+  // Admins can access admin dashboard via the Admin tab in navigation
   return <Navigate to="/student/dashboard" replace />;
 };
 
