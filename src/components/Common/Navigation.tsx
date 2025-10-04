@@ -17,8 +17,12 @@ import {
   Calendar,
   Mail,
   UserCircle,
-  Building
+  Building,
+  Sparkles,
+  MessageSquare
 } from 'lucide-react';
+import BugFeatureModal from './BugFeatureModal';
+import NewFeaturesModal from './NewFeaturesModal';
 
 interface NavItem {
   label: string;
@@ -44,6 +48,8 @@ const Navigation: React.FC<NavigationProps> = ({
   const location = useLocation();
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showBugFeatureModal, setShowBugFeatureModal] = useState(false);
+  const [showNewFeaturesModal, setShowNewFeaturesModal] = useState(false);
 
   // Fetch pending actions count
   useEffect(() => {
@@ -211,6 +217,27 @@ const Navigation: React.FC<NavigationProps> = ({
                           </span>
                         )}
                       </div>
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          setShowNewFeaturesModal(true);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                      >
+                        <Sparkles size={16} />
+                        <span>What's New</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          setShowBugFeatureModal(true);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                      >
+                        <MessageSquare size={16} />
+                        <span>Submit Bug/Feature</span>
+                      </button>
+                      <div className="border-t border-gray-100 my-1"></div>
                       <button
                         onClick={() => {
                           setShowUserMenu(false);
@@ -550,6 +577,25 @@ const Navigation: React.FC<NavigationProps> = ({
           </div>
         </div>
       )}
+
+      {/* Bug/Feature Modal */}
+      {userData && (
+        <BugFeatureModal
+          isOpen={showBugFeatureModal}
+          onClose={() => setShowBugFeatureModal(false)}
+          userData={{
+            id: userData.id,
+            name: userData.name,
+            email: userData.email
+          }}
+        />
+      )}
+
+      {/* New Features Modal */}
+      <NewFeaturesModal
+        isOpen={showNewFeaturesModal}
+        onClose={() => setShowNewFeaturesModal(false)}
+      />
     </>
   );
 };

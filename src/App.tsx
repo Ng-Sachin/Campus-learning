@@ -20,6 +20,7 @@ import PairProgrammingManagement from './components/Mentor/PairProgrammingManage
 
 // Admin Components
 import AdminDashboard from './components/Admin/AdminDashboard';
+import AdminBugReports from './components/Admin/AdminBugReports';
 
 // Error Components
 const Unauthorized = () => (
@@ -137,6 +138,13 @@ function App() {
             <Route path="/admin/dashboard" element={
               <ProtectedRoute requireAdmin={true}>
                 <AdminDashboard />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/bug-reports" element={
+              <ProtectedRoute requireAdmin={true}>
+                <Layout>
+                  <AdminBugReports />
+                </Layout>
               </ProtectedRoute>
             } />
 

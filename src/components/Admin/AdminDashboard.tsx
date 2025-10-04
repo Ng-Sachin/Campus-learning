@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { DataSeedingService } from '../../services/dataSeedingService';
 import AdminUserManagement from './AdminUserManagement';
 import MentorAssignment from './MentorAssignment';
@@ -15,12 +16,14 @@ import {
   BarChart3,
   Settings,
   Star,
-  UserPlus
+  UserPlus,
+  MessageSquare
 } from 'lucide-react';
 
 type TabType = 'overview' | 'users' | 'mentors' | 'super-mentors' | 'mentor-requests' | 'reports' | 'curriculum';
 
 const AdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [dataStatus, setDataStatus] = useState({ phasesCount: 0, topicsCount: 0, isSeeded: false });
   const [isSeeding, setIsSeeding] = useState(false);
@@ -221,7 +224,7 @@ const AdminDashboard: React.FC = () => {
               {/* Quick Actions */}
               <div className="border-t border-gray-200 pt-6">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                   <button
                     onClick={() => setActiveTab('users')}
                     className="flex items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors"
@@ -252,6 +255,17 @@ const AdminDashboard: React.FC = () => {
                     <div className="text-left">
                       <p className="font-medium text-purple-900">View Reports</p>
                       <p className="text-sm text-purple-700">Analytics and insights</p>
+                    </div>
+                  </button>
+
+                  <button
+                    onClick={() => navigate('/admin/bug-reports')}
+                    className="flex items-center p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors"
+                  >
+                    <MessageSquare className="h-6 w-6 text-orange-600 mr-3" />
+                    <div className="text-left">
+                      <p className="font-medium text-orange-900">Bug Reports</p>
+                      <p className="text-sm text-orange-700">Review user feedback</p>
                     </div>
                   </button>
                 </div>
