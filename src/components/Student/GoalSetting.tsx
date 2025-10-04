@@ -293,7 +293,7 @@ const GoalSetting: React.FC = () => {
           </div>
         </div>
         
-        {todaysGoal?.status === 'pending' && (
+        {(todaysGoal?.status === 'pending' || todaysGoal?.status === 'reviewed') && (
           <button
             onClick={() => setIsEditing(true)}
             className="p-2 text-gray-400 hover:text-gray-600"
@@ -304,9 +304,22 @@ const GoalSetting: React.FC = () => {
       </div>
       
       {todaysGoal?.status === 'reviewed' && (
-        <div className="mt-4 p-4 bg-blue-50 rounded-md">
-          <h4 className="text-sm font-medium text-blue-900 mb-2">Status:</h4>
-          <p className="text-blue-800">Your goal has been reviewed by your mentor</p>
+        <div className="mt-4 p-4 bg-orange-50 border border-orange-200 rounded-md">
+          <h4 className="text-sm font-medium text-orange-900 mb-2 flex items-center space-x-2">
+            <AlertCircle className="h-4 w-4" />
+            <span>Mentor Feedback - Revision Needed</span>
+          </h4>
+          <p className="text-orange-800">Your mentor has reviewed your goal and is requesting changes. Please edit and resubmit.</p>
+        </div>
+      )}
+      
+      {todaysGoal?.status === 'approved' && (
+        <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-md">
+          <h4 className="text-sm font-medium text-green-900 mb-2 flex items-center space-x-2">
+            <CheckCircle className="h-4 w-4" />
+            <span>Goal Approved</span>
+          </h4>
+          <p className="text-green-800">Your mentor has approved your goal. You can now complete your reflection at the end of the day.</p>
         </div>
       )}
     </div>
@@ -314,26 +327,22 @@ const GoalSetting: React.FC = () => {
 
   // Render reflection section
   const renderReflectionSection = () => (
-    <div>
-      {todaysGoal?.status === 'reviewed' && (
-        <div className="mb-6 bg-blue-50 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-blue-900 mb-2">Goal Status</h3>
-          <p className="text-blue-800">Your goal has been reviewed and approved by your mentor</p>
-        </div>
-      )}
-      
+    <div className="mt-6">
       {!todaysReflection ? (
-        <div className="text-center py-8">
+        <div className="text-center py-8 bg-white rounded-lg shadow-sm">
           <MessageSquare className="h-12 w-12 text-primary-600 mx-auto mb-4" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">Time to Reflect</h3>
           <p className="text-gray-600 mb-4">Your goal has been approved. Take a moment to reflect on your progress.</p>
           <DailyReflectionForm goal={todaysGoal!} studentId={userData?.id || ''} onSubmitSuccess={handleReflectionSubmit} />
         </div>
       ) : (
-        <div className="bg-green-50 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-green-900 mb-4">Reflection Completed</h3>
-          <p className="text-green-800">{todaysReflection.reflection_answers.workedWell}</p>
-          <div className="mt-4 text-sm text-green-700">
+        <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+          <h3 className="text-lg font-semibold text-green-900 mb-4 flex items-center space-x-2">
+            <CheckCircle className="h-5 w-5" />
+            <span>Reflection Completed</span>
+          </h3>
+          <p className="text-green-800 mb-2">{todaysReflection.reflection_answers.workedWell}</p>
+          <div className="mt-4 text-sm text-green-700 font-medium">
             Achievement Level: {todaysReflection.achieved_percentage}%
           </div>
         </div>
@@ -419,8 +428,9 @@ const GoalSetting: React.FC = () => {
           )}
 
           {/* Content based on state */}
-          {(!todaysGoal || isEditing) && renderGoalForm()}
-          {todaysGoal && !isEditing && (
+          {(!todaysGoal || isEditing) ? (
+            renderGoalForm()
+          ) : (
             <>
               {renderGoalCard()}
               {todaysGoal.status === 'approved' && renderReflectionSection()}
