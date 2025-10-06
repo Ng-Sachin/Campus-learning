@@ -7,7 +7,7 @@ interface AttendanceDashboardProps {
   className?: string;
 }
 
-export const AttendanceDashboard: React.FC<AttendanceDashboardProps> = ({ className = '' }) => {
+const AttendanceDashboard: React.FC<AttendanceDashboardProps> = ({ className = '' }) => {
   const { userData } = useAuth();
   const [stats, setStats] = useState<DailyAttendanceStats | null>(null);
   const [loading, setLoading] = useState(true);
