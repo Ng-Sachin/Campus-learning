@@ -421,9 +421,158 @@ const PairProgrammingDashboard: React.FC = () => {
 
         {activeTab === 'sessions' && (
           <div className="space-y-6">
-            {/* Sessions list would go here */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-              <p className="text-gray-500 text-center">Sessions management coming soon...</p>
+            {/* Upcoming Sessions */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Upcoming Sessions</h3>
+                <p className="text-sm text-gray-500 mt-1">Sessions scheduled for future dates</p>
+              </div>
+              <div className="p-6">
+                {dashboardData.upcoming_sessions.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Calendar className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-500">No upcoming sessions scheduled</p>
+                    <button
+                      onClick={() => setShowRequestModal(true)}
+                      className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-primary-700 bg-primary-100 hover:bg-primary-200"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Request a Session
+                    </button>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {dashboardData.upcoming_sessions.map((session) => (
+                      <div
+                        key={session.id}
+                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-primary-300 hover:shadow-sm transition-all"
+                      >
+                        <div className="flex items-center space-x-4 flex-1">
+                          {getStatusIcon(session.status)}
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">{session.topic}</p>
+                            {session.description && (
+                              <p className="text-sm text-gray-600 mt-1">{session.description}</p>
+                            )}
+                            <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                              {session.scheduled_date && (
+                                <span className="flex items-center">
+                                  <Calendar className="h-4 w-4 mr-1" />
+                                  {new Date(session.scheduled_date).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                  })}
+                                </span>
+                              )}
+                              {session.scheduled_time && (
+                                <span className="flex items-center">
+                                  <Clock className="h-4 w-4 mr-1" />
+                                  {session.scheduled_time}
+                                </span>
+                              )}
+                              <span>
+                                {userRole === 'mentee' ? 'Mentor' : 'Mentee'}: {session.mentor_id || session.student_id}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(session.status)}`}>
+                            {session.status}
+                          </span>
+                          <button
+                            onClick={() => {
+                              setSelectedSession(session);
+                              setShowSessionModal(true);
+                            }}
+                            className="text-primary-600 hover:text-primary-800 text-sm font-medium px-3 py-1 hover:bg-primary-50 rounded"
+                          >
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Past Sessions */}
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+              <div className="px-6 py-4 border-b border-gray-200">
+                <h3 className="text-lg font-medium text-gray-900">Past Sessions</h3>
+                <p className="text-sm text-gray-500 mt-1">Completed and cancelled sessions</p>
+              </div>
+              <div className="p-6">
+                {dashboardData.recent_completed.length === 0 ? (
+                  <div className="text-center py-8">
+                    <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                    <p className="text-gray-500">No past sessions yet</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {dashboardData.recent_completed.map((session) => (
+                      <div
+                        key={session.id}
+                        className="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:border-gray-300 transition-all"
+                      >
+                        <div className="flex items-center space-x-4 flex-1">
+                          {getStatusIcon(session.status)}
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">{session.topic}</p>
+                            {session.description && (
+                              <p className="text-sm text-gray-600 mt-1">{session.description}</p>
+                            )}
+                            <div className="flex items-center space-x-4 mt-2 text-sm text-gray-500">
+                              {session.completed_at && (
+                                <span className="flex items-center">
+                                  <CheckCircle className="h-4 w-4 mr-1" />
+                                  Completed {new Date(session.completed_at).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                  })}
+                                </span>
+                              )}
+                              {session.cancelled_at && (
+                                <span className="flex items-center">
+                                  <XCircle className="h-4 w-4 mr-1" />
+                                  Cancelled {new Date(session.cancelled_at).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric'
+                                  })}
+                                </span>
+                              )}
+                              <span>
+                                {userRole === 'mentee' ? 'Mentor' : 'Mentee'}: {session.mentor_id || session.student_id}
+                              </span>
+                            </div>
+                            {session.notes && (
+                              <p className="text-sm text-gray-600 mt-2 italic">"{session.notes}"</p>
+                            )}
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <span className={`px-3 py-1 text-xs font-medium rounded-full ${getStatusColor(session.status)}`}>
+                            {session.status}
+                          </span>
+                          <button
+                            onClick={() => {
+                              setSelectedSession(session);
+                              setShowSessionModal(true);
+                            }}
+                            className="text-gray-600 hover:text-gray-800 text-sm font-medium px-3 py-1 hover:bg-gray-50 rounded"
+                          >
+                            View Details
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}

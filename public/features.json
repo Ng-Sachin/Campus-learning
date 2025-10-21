@@ -1,8 +1,17 @@
 {
-  "generatedAt": "2025-10-21T17:17:58.550Z",
+  "generatedAt": "2025-10-21T17:25:51.178Z",
   "version": "0.1.0",
   "features": {
     "all": [
+      {
+        "id": "feature-aa453858",
+        "title": "Phase 5 - Auto-requeue cancelled sessions",
+        "description": "Phase 5 - Auto-requeue cancelled sessions",
+        "status": "released",
+        "dateAdded": "2025-10-21",
+        "commitHash": "aa453858dea79a5fb90e652a08f5b36879f621c2",
+        "author": "Mubin"
+      },
       {
         "id": "feature-82d9708a",
         "title": "Phase 4 Complete - Rolling Queue System Fully Implemented",
@@ -132,6 +141,15 @@
       }
     ],
     "released": [
+      {
+        "id": "feature-aa453858",
+        "title": "Phase 5 - Auto-requeue cancelled sessions",
+        "description": "Phase 5 - Auto-requeue cancelled sessions",
+        "status": "released",
+        "dateAdded": "2025-10-21",
+        "commitHash": "aa453858dea79a5fb90e652a08f5b36879f621c2",
+        "author": "Mubin"
+      },
       {
         "id": "feature-82d9708a",
         "title": "Phase 4 Complete - Rolling Queue System Fully Implemented",
