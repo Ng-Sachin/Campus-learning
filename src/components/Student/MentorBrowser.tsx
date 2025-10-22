@@ -66,11 +66,27 @@ const MentorBrowser: React.FC<MentorBrowserProps> = ({
       setSelectedMentor(null); // Reset selection
       setReason(''); // Clear reason
       try {
+        console.log('🔍 [MentorBrowser] Starting to load mentors...');
         const allMentors = await MentorshipService.getAllMentorsWithCapacity();
+        console.log('✅ [MentorBrowser] Received mentors:', allMentors.length);
+        
         const filtered = allMentors.filter(m => m.mentor.id !== currentStudentId);
-        const sorted = filtered.sort((a, b) => a.mentor.name.localeCompare(b.mentor.name));
+        console.log('✅ [MentorBrowser] Filtered mentors (excluding self):', filtered.length);
+        
+        const sorted = filtered.sort((a, b) => {
+          const nameA = a.mentor.name || a.mentor.email || '';
+          const nameB = b.mentor.name || b.mentor.email || '';
+          return nameA.localeCompare(nameB);
+        });
+        console.log('✅ [MentorBrowser] Setting mentors state with:', sorted.length, 'mentors');
+        
         setMentors(sorted);
-      } catch {
+        
+        if (sorted.length === 0) {
+          setError('No mentors available at the moment.');
+        }
+      } catch (error) {
+        console.error('❌ [MentorBrowser] Error loading mentors:', error);
         setError('Failed to load mentors. Please try again.');
       } finally {
         setLoading(false);
