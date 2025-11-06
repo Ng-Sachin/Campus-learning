@@ -346,9 +346,13 @@ export class ReflectionService extends FirestoreService {
         status,
         reviewed_by: reviewerId,
         reviewed_at: new Date(),
-        feedback_given_at: new Date(),
-        mentor_notes: mentorNotes
+        feedback_given_at: new Date()
       };
+
+      // Only add mentor_notes if it has a value (Firestore doesn't allow undefined)
+      if (mentorNotes !== undefined && mentorNotes !== null) {
+        updateData.mentor_notes = mentorNotes;
+      }
 
       if (mentorAssessment) {
         updateData.mentor_assessment = mentorAssessment;

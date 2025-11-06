@@ -167,6 +167,24 @@ const MentorMenteeReview: React.FC = () => {
   const handleSubmitFeedback = async () => {
     if (!selectedItem || !userData) return;
 
+    // Validation: Check if action is selected when goal is pending
+    if (selectedItem.goal.status === 'pending' && !feedbackForm.goalStatus) {
+      alert('Please select an action (Approve or Request Changes) for the goal.');
+      return;
+    }
+
+    // Validation: Check if feedback is provided when requesting changes
+    if (feedbackForm.goalStatus === 'reviewed' && !feedbackForm.goalComment?.trim()) {
+      alert('Please provide feedback when requesting changes.');
+      return;
+    }
+
+    // Validation: Check if reflection status is selected when reflection is pending
+    if (selectedItem.reflection?.status === 'pending' && !feedbackForm.reflectionStatus) {
+      alert('Please select an action for the reflection.');
+      return;
+    }
+
     try {
       setSubmitting(true);
 
@@ -191,12 +209,25 @@ const MentorMenteeReview: React.FC = () => {
         );
       }
 
+      // Show success message
+      setToast({ 
+        visible: true, 
+        message: feedbackForm.goalStatus === 'approved' 
+          ? '✅ Successfully approved!' 
+          : '✅ Feedback submitted successfully!', 
+        type: 'success' 
+      });
+
       // Reload data
       await loadStudentData();
       closeFeedbackPanel();
     } catch (error) {
       console.error('Error submitting feedback:', error);
-      alert('Failed to submit feedback. Please try again.');
+      setToast({ 
+        visible: true, 
+        message: '❌ Failed to submit feedback. Please try again.', 
+        type: 'error' 
+      });
     } finally {
       setSubmitting(false);
     }
@@ -734,11 +765,11 @@ const MentorMenteeReview: React.FC = () => {
               {selectedItem.goal.status === 'pending' && (
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-3">
-                    Goal Status <span className="text-red-500">*</span>
+                    Goal Action <span className="text-red-500">*</span>
                   </label>
                   <div className="space-y-2">
                     <button
-                      onClick={() => setFeedbackForm({ ...feedbackForm, goalStatus: 'approved' })}
+                      onClick={() => setFeedbackForm({ ...feedbackForm, goalStatus: 'approved', goalComment: '' })}
                       className={`w-full flex items-center space-x-3 p-4 rounded-lg border-2 transition-all ${
                         feedbackForm.goalStatus === 'approved'
                           ? 'border-green-500 bg-green-50'
@@ -747,7 +778,7 @@ const MentorMenteeReview: React.FC = () => {
                     >
                       <CheckCircle className={`h-5 w-5 ${feedbackForm.goalStatus === 'approved' ? 'text-green-600' : 'text-gray-400'}`} />
                       <div className="text-left">
-                        <p className="font-medium text-gray-900">Approve Goal</p>
+                        <p className="font-medium text-gray-900">✓ Approve Goal</p>
                         <p className="text-sm text-gray-500">Goal is clear and achievable</p>
                       </div>
                     </button>
@@ -755,17 +786,40 @@ const MentorMenteeReview: React.FC = () => {
                       onClick={() => setFeedbackForm({ ...feedbackForm, goalStatus: 'reviewed' })}
                       className={`w-full flex items-center space-x-3 p-4 rounded-lg border-2 transition-all ${
                         feedbackForm.goalStatus === 'reviewed'
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-blue-300'
+                          ? 'border-yellow-500 bg-yellow-50'
+                          : 'border-gray-200 hover:border-yellow-300'
                       }`}
                     >
-                      <Clock className={`h-5 w-5 ${feedbackForm.goalStatus === 'reviewed' ? 'text-blue-600' : 'text-gray-400'}`} />
+                      <AlertCircle className={`h-5 w-5 ${feedbackForm.goalStatus === 'reviewed' ? 'text-yellow-600' : 'text-gray-400'}`} />
                       <div className="text-left">
-                        <p className="font-medium text-gray-900">Mark as Reviewed</p>
+                        <p className="font-medium text-gray-900">⚠ Request Changes</p>
                         <p className="text-sm text-gray-500">Needs clarification or adjustment</p>
                       </div>
                     </button>
                   </div>
+                  
+                  {/* Goal Feedback Text - Only show when requesting changes */}
+                  {feedbackForm.goalStatus === 'reviewed' && (
+                    <div className="mt-4">
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Feedback for Student <span className="text-red-500">*</span>
+                      </label>
+                      <textarea
+                        value={feedbackForm.goalComment}
+                        onChange={(e) => setFeedbackForm({ ...feedbackForm, goalComment: e.target.value })}
+                        rows={4}
+                        className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 ${
+                          !feedbackForm.goalComment?.trim() ? 'border-red-300' : 'border-gray-300'
+                        }`}
+                        placeholder="Required: Explain what needs to be improved or changed..."
+                      />
+                      {!feedbackForm.goalComment?.trim() && (
+                        <p className="text-sm text-red-600 mt-1">
+                          ⚠ Feedback is required when requesting changes
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -905,14 +959,24 @@ const MentorMenteeReview: React.FC = () => {
               <div className="flex items-center justify-between">
                 <button
                   onClick={closeFeedbackPanel}
-                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                  disabled={submitting}
+                  className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleSubmitFeedback}
-                  disabled={submitting || (!selectedItem.reflection && !feedbackForm.goalStatus)}
-                  className="flex items-center space-x-2 px-6 py-2 bg-primary-600 text-white rounded-md hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  disabled={
+                    submitting || 
+                    (selectedItem.goal.status === 'pending' && !feedbackForm.goalStatus) ||
+                    (feedbackForm.goalStatus === 'reviewed' && !feedbackForm.goalComment?.trim()) ||
+                    (selectedItem.reflection?.status === 'pending' && !feedbackForm.reflectionStatus)
+                  }
+                  className={`flex items-center space-x-2 px-6 py-2 rounded-md text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                    feedbackForm.goalStatus === 'approved' || feedbackForm.reflectionStatus === 'approved'
+                      ? 'bg-green-600 hover:bg-green-700'
+                      : 'bg-yellow-600 hover:bg-yellow-700'
+                  }`}
                 >
                   {submitting ? (
                     <>
@@ -922,7 +986,11 @@ const MentorMenteeReview: React.FC = () => {
                   ) : (
                     <>
                       <Send className="h-4 w-4" />
-                      <span>Submit Feedback</span>
+                      <span>
+                        {feedbackForm.goalStatus === 'approved' || feedbackForm.reflectionStatus === 'approved' 
+                          ? 'Approve' 
+                          : 'Send Feedback'}
+                      </span>
                     </>
                   )}
                 </button>
@@ -973,20 +1041,20 @@ const MentorMenteeReview: React.FC = () => {
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span className={menteeReview.morningExercise <= -1 ? 'font-semibold text-red-600' : ''}>-2: Needs improvement</span>
-                  <span className={menteeReview.morningExercise === 0 ? 'font-semibold text-yellow-600' : ''}>0: Average</span>
-                  <span className={menteeReview.morningExercise >= 1 ? 'font-semibold text-green-600' : ''}>2: Excellent</span>
+                  <span className={menteeReview.morningExercise <= -1 ? 'font-semibold text-red-600' : ''}>-2: Needs to put in serious effort</span>
+                  <span className={menteeReview.morningExercise === 0 ? 'font-semibold text-yellow-600' : ''}>0: Has scope for improvement</span>
+                  <span className={menteeReview.morningExercise >= 1 ? 'font-semibold text-green-600' : ''}>+2: Showing great growth</span>
                 </div>
                 <div className={`text-center text-sm font-medium mt-2 px-3 py-1 rounded-full inline-block ${
                   menteeReview.morningExercise >= 1 ? 'bg-green-100 text-green-800' :
                   menteeReview.morningExercise <= -1 ? 'bg-red-100 text-red-800' :
                   'bg-yellow-100 text-yellow-800'
                 }`}>
-                  {menteeReview.morningExercise === -2 ? 'Needs to come regularly' :
-                   menteeReview.morningExercise === -1 ? 'Rarely participates' :
-                   menteeReview.morningExercise === 0 ? 'Sometimes present' :
-                   menteeReview.morningExercise === 1 ? 'Often participates' :
-                   'Actively participates'}
+                  {menteeReview.morningExercise === -2 ? 'Needs to put in serious effort' :
+                   menteeReview.morningExercise === -1 ? 'Needs consistent effort' :
+                   menteeReview.morningExercise === 0 ? 'Has scope for improvement' :
+                   menteeReview.morningExercise === 1 ? 'Improving consistently' :
+                   'Showing great growth'}
                 </div>
               </div>
 
@@ -1004,20 +1072,20 @@ const MentorMenteeReview: React.FC = () => {
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span className={menteeReview.communication <= -1 ? 'font-semibold text-red-600' : ''}>-2: Poor skills</span>
-                  <span className={menteeReview.communication === 0 ? 'font-semibold text-yellow-600' : ''}>0: Basic</span>
-                  <span className={menteeReview.communication >= 1 ? 'font-semibold text-green-600' : ''}>2: Excellent</span>
+                  <span className={menteeReview.communication <= -1 ? 'font-semibold text-red-600' : ''}>-2: Needs to put in serious effort</span>
+                  <span className={menteeReview.communication === 0 ? 'font-semibold text-yellow-600' : ''}>0: Has scope for improvement</span>
+                  <span className={menteeReview.communication >= 1 ? 'font-semibold text-green-600' : ''}>+2: Showing great growth</span>
                 </div>
                 <div className={`text-center text-sm font-medium mt-2 px-3 py-1 rounded-full inline-block ${
                   menteeReview.communication >= 1 ? 'bg-green-100 text-green-800' :
                   menteeReview.communication <= -1 ? 'bg-red-100 text-red-800' :
                   'bg-yellow-100 text-yellow-800'
                 }`}>
-                  {menteeReview.communication === -2 ? 'Poor communication skills' :
-                   menteeReview.communication === -1 ? 'Below average' :
-                   menteeReview.communication === 0 ? 'Basic communication' :
-                   menteeReview.communication === 1 ? 'Good communicator' :
-                   'Excellent communicator'}
+                  {menteeReview.communication === -2 ? 'Needs to put in serious effort' :
+                   menteeReview.communication === -1 ? 'Needs consistent effort' :
+                   menteeReview.communication === 0 ? 'Has scope for improvement' :
+                   menteeReview.communication === 1 ? 'Improving consistently' :
+                   'Showing great growth'}
                 </div>
               </div>
 
@@ -1035,20 +1103,20 @@ const MentorMenteeReview: React.FC = () => {
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span className={menteeReview.academicEffort <= -1 ? 'font-semibold text-red-600' : ''}>-2: Minimal effort</span>
-                  <span className={menteeReview.academicEffort === 0 ? 'font-semibold text-yellow-600' : ''}>0: Moderate</span>
-                  <span className={menteeReview.academicEffort >= 1 ? 'font-semibold text-green-600' : ''}>2: Exceptional</span>
+                  <span className={menteeReview.academicEffort <= -1 ? 'font-semibold text-red-600' : ''}>-2: Needs to put in serious effort</span>
+                  <span className={menteeReview.academicEffort === 0 ? 'font-semibold text-yellow-600' : ''}>0: Has scope for improvement</span>
+                  <span className={menteeReview.academicEffort >= 1 ? 'font-semibold text-green-600' : ''}>+2: Showing great growth</span>
                 </div>
                 <div className={`text-center text-sm font-medium mt-2 px-3 py-1 rounded-full inline-block ${
                   menteeReview.academicEffort >= 1 ? 'bg-green-100 text-green-800' :
                   menteeReview.academicEffort <= -1 ? 'bg-red-100 text-red-800' :
                   'bg-yellow-100 text-yellow-800'
                 }`}>
-                  {menteeReview.academicEffort === -2 ? 'Minimal academic effort' :
-                   menteeReview.academicEffort === -1 ? 'Below average effort' :
-                   menteeReview.academicEffort === 0 ? 'Moderate effort' :
-                   menteeReview.academicEffort === 1 ? 'Good dedication' :
-                   'Exceptional dedication'}
+                  {menteeReview.academicEffort === -2 ? 'Needs to put in serious effort' :
+                   menteeReview.academicEffort === -1 ? 'Needs consistent effort' :
+                   menteeReview.academicEffort === 0 ? 'Has scope for improvement' :
+                   menteeReview.academicEffort === 1 ? 'Improving consistently' :
+                   'Showing great growth'}
                 </div>
               </div>
 
@@ -1066,20 +1134,20 @@ const MentorMenteeReview: React.FC = () => {
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span className={menteeReview.campusContribution <= -1 ? 'font-semibold text-red-600' : ''}>-2: No involvement</span>
-                  <span className={menteeReview.campusContribution === 0 ? 'font-semibold text-yellow-600' : ''}>0: Occasional</span>
-                  <span className={menteeReview.campusContribution >= 1 ? 'font-semibold text-green-600' : ''}>2: Active leader</span>
+                  <span className={menteeReview.campusContribution <= -1 ? 'font-semibold text-red-600' : ''}>-2: Needs to put in serious effort</span>
+                  <span className={menteeReview.campusContribution === 0 ? 'font-semibold text-yellow-600' : ''}>0: Has scope for improvement</span>
+                  <span className={menteeReview.campusContribution >= 1 ? 'font-semibold text-green-600' : ''}>+2: Showing great growth</span>
                 </div>
                 <div className={`text-center text-sm font-medium mt-2 px-3 py-1 rounded-full inline-block ${
                   menteeReview.campusContribution >= 1 ? 'bg-green-100 text-green-800' :
                   menteeReview.campusContribution <= -1 ? 'bg-red-100 text-red-800' :
                   'bg-yellow-100 text-yellow-800'
                 }`}>
-                  {menteeReview.campusContribution === -2 ? 'No campus involvement' :
-                   menteeReview.campusContribution === -1 ? 'Minimal participation' :
-                   menteeReview.campusContribution === 0 ? 'Occasional participation' :
-                   menteeReview.campusContribution === 1 ? 'Regular contributor' :
-                   'Active campus leader'}
+                  {menteeReview.campusContribution === -2 ? 'Needs to put in serious effort' :
+                   menteeReview.campusContribution === -1 ? 'Needs consistent effort' :
+                   menteeReview.campusContribution === 0 ? 'Has scope for improvement' :
+                   menteeReview.campusContribution === 1 ? 'Improving consistently' :
+                   'Showing great growth'}
                 </div>
               </div>
 
@@ -1097,20 +1165,20 @@ const MentorMenteeReview: React.FC = () => {
                   className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
                 />
                 <div className="flex justify-between text-xs text-gray-500 mt-1">
-                  <span className={menteeReview.behavioural <= -1 ? 'font-semibold text-red-600' : ''}>-2: Disruptive</span>
-                  <span className={menteeReview.behavioural === 0 ? 'font-semibold text-yellow-600' : ''}>0: Neutral</span>
-                  <span className={menteeReview.behavioural >= 1 ? 'font-semibold text-green-600' : ''}>2: Exemplary</span>
+                  <span className={menteeReview.behavioural <= -1 ? 'font-semibold text-red-600' : ''}>-2: Needs to put in serious effort</span>
+                  <span className={menteeReview.behavioural === 0 ? 'font-semibold text-yellow-600' : ''}>0: Has scope for improvement</span>
+                  <span className={menteeReview.behavioural >= 1 ? 'font-semibold text-green-600' : ''}>+2: Showing great growth</span>
                 </div>
                 <div className={`text-center text-sm font-medium mt-2 px-3 py-1 rounded-full inline-block ${
                   menteeReview.behavioural >= 1 ? 'bg-green-100 text-green-800' :
                   menteeReview.behavioural <= -1 ? 'bg-red-100 text-red-800' :
                   'bg-yellow-100 text-yellow-800'
                 }`}>
-                  {menteeReview.behavioural === -2 ? 'Disruptive behavior' :
-                   menteeReview.behavioural === -1 ? 'Needs improvement' :
-                   menteeReview.behavioural === 0 ? 'Neutral behavior' :
-                   menteeReview.behavioural === 1 ? 'Good conduct' :
-                   'Exemplary conduct'}
+                  {menteeReview.behavioural === -2 ? 'Needs to put in serious effort' :
+                   menteeReview.behavioural === -1 ? 'Needs consistent effort' :
+                   menteeReview.behavioural === 0 ? 'Has scope for improvement' :
+                   menteeReview.behavioural === 1 ? 'Improving consistently' :
+                   'Showing great growth'}
                 </div>
               </div>
 
