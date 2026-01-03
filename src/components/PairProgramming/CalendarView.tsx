@@ -3,6 +3,7 @@ import { CalendarEvent } from '../../types';
 import { ChevronLeft, ChevronRight, Calendar, Clock } from 'lucide-react';
 import { EnhancedPairProgrammingService } from '../../services/dataServices';
 import { useAuth } from '../../contexts/AuthContext';
+import { toISTDateString } from '../../utils/timezone';
 
 interface CalendarViewProps {
   onEventClick?: (event: CalendarEvent) => void;
@@ -73,7 +74,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({ onEventClick }) => {
     return events.filter(event => {
       if (!event.start_date) return false;
       const eventDate = new Date(event.start_date);
-      return eventDate.toDateString() === date.toDateString();
+      // Compare dates in IST timezone to ensure consistency
+      return toISTDateString(eventDate) === toISTDateString(date);
     });
   };
 

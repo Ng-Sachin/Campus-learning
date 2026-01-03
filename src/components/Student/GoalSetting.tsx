@@ -14,6 +14,7 @@ import { getSmartFeedback } from '../../services/geminiClientApi';
 import DailyReflectionForm from './DailyReflectionForm';
 import { detailedTopics } from '../../data/initialData';
 import { PhaseApprovalService } from '../../services/phaseApprovalService';
+import { getISTStartOfDay, getISTEndOfDay } from '../../utils/timezone';
 import {
   Target,
   TrendingUp,
@@ -173,12 +174,9 @@ const GoalSetting: React.FC = () => {
       
       setApprovedPhases(approvedPhaseIds);
 
-      // Get today's goal - look for goals created today
-      const today = new Date();
-      const startOfDay = new Date(today);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(today);
-      endOfDay.setHours(23, 59, 59, 999);
+      // Get today's goal - look for goals created today (IST timezone)
+      const startOfDay = getISTStartOfDay();
+      const endOfDay = getISTEndOfDay();
 
       const todaysGoals = await FirestoreService.getWhere<DailyGoal>(
         COLLECTIONS.DAILY_GOALS,

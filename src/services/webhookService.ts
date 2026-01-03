@@ -2,6 +2,7 @@ import { collection, query, where, getDocs, addDoc, updateDoc, doc, serverTimest
 import { db } from './firebase';
 import { COLLECTIONS } from './firestore';
 import { CampusWebhook, WebhookChangeNotification } from '../types';
+import { logger } from '../utils/logger';
 
 export class WebhookService {
   /**
@@ -27,7 +28,7 @@ export class WebhookService {
         updated_at: doc.data().updated_at?.toDate(),
       } as CampusWebhook;
     } catch (error) {
-      console.error('Error fetching webhook:', error);
+      logger.error('Error fetching webhook:', error);
       throw error;
     }
   }

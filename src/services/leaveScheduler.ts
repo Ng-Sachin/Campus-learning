@@ -1,4 +1,5 @@
 import { LeaveManagementService } from './leaveManagementService';
+import { getISTDate, getISTStartOfDay } from '../utils/timezone';
 
 export class LeaveScheduler {
   private static intervalId: NodeJS.Timeout | null = null;
@@ -53,16 +54,13 @@ export class LeaveScheduler {
     }
   }
 
-  // Schedule a check to run at midnight
+  // Schedule a check to run at midnight IST
   private static scheduleMidnightCheck() {
-    const now = new Date();
-    const tonight = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() + 1, // Next day
-      0, 0, 0 // Midnight
-    );
-    const msUntilMidnight = tonight.getTime() - now.getTime();
+    const nowIST = getISTDate();
+    const tomorrowIST = new Date(nowIST);
+    tomorrowIST.setDate(tomorrowIST.getDate() + 1);
+    const midnightIST = getISTStartOfDay(tomorrowIST);
+    const msUntilMidnight = midnightIST.getTime() - nowIST.getTime();
 
     setTimeout(() => {
       this.checkAndExpireLeaves();
@@ -70,7 +68,7 @@ export class LeaveScheduler {
       this.scheduleMidnightCheck();
     }, msUntilMidnight);
 
-    console.log(`Scheduled midnight check in ${Math.round(msUntilMidnight / 1000 / 60)} minutes`);
+    console.log(`Scheduled midnight IST check in ${Math.round(msUntilMidnight / 1000 / 60)} minutes`);
   }
 
   // Manual trigger for testing

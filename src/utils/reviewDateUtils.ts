@@ -3,15 +3,18 @@
  * Centralized functions for calculating week starts, deadlines, and review status
  */
 
+import { getISTDate, getISTStartOfDay } from './timezone';
+
 /**
  * Get the Monday of the current week (week starts on Monday)
  * This is the foundation for all review deadline calculations
+ * Uses IST timezone for consistency across all users
  * 
- * @returns Date object representing Monday at 00:00:00
+ * @returns Date object representing Monday at 00:00:00 IST
  */
 export const getCurrentWeekStart = (): Date => {
-  const now = new Date();
-  const dayOfWeek = now.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  const nowIST = getISTDate();
+  const dayOfWeek = nowIST.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
   
   // Calculate days since Monday (offset to make Monday = 0)
   // Sunday (0) -> 6 days since Monday
@@ -19,28 +22,27 @@ export const getCurrentWeekStart = (): Date => {
   // Tuesday (2) -> 1 day since Monday, etc.
   const daysSinceMonday = (dayOfWeek + 6) % 7;
   
-  const weekStart = new Date(now);
-  weekStart.setDate(now.getDate() - daysSinceMonday);
-  weekStart.setHours(0, 0, 0, 0);
-  
-  return weekStart;
+  const weekStart = new Date(nowIST);
+  weekStart.setDate(nowIST.getDate() - daysSinceMonday);
+  return getISTStartOfDay(weekStart);
 };
 
 /**
  * Get Monday of a specific date's week
+ * Uses IST timezone for consistency
  * 
  * @param date - The date to find the week start for
- * @returns Date object representing Monday of that week at 00:00:00
+ * @returns Date object representing Monday of that week at 00:00:00 IST
  */
 export const getWeekStartForDate = (date: Date): Date => {
-  const dayOfWeek = date.getDay();
+  // Convert to IST date first
+  const istDate = new Date(date.toLocaleString('en-US', { timeZone: 'Asia/Kolkata' }));
+  const dayOfWeek = istDate.getDay();
   const daysSinceMonday = (dayOfWeek + 6) % 7;
   
-  const weekStart = new Date(date);
-  weekStart.setDate(date.getDate() - daysSinceMonday);
-  weekStart.setHours(0, 0, 0, 0);
-  
-  return weekStart;
+  const weekStart = new Date(istDate);
+  weekStart.setDate(istDate.getDate() - daysSinceMonday);
+  return getISTStartOfDay(weekStart);
 };
 
 /**
@@ -59,20 +61,21 @@ export const getReviewDeadline = (weekStart: Date): Date => {
 };
 
 /**
- * Check if a review is overdue based on current date
+ * Check if a review is overdue based on current date in IST
  * 
  * @param weekStart - The week the review is for
  * @returns boolean - true if past Monday deadline
  */
 export const isReviewOverdue = (weekStart: Date): boolean => {
   const deadline = getReviewDeadline(weekStart);
-  const now = new Date();
+  const nowIST = getISTDate();
   
-  return now > deadline;
+  return nowIST > deadline;
 };
 
 /**
  * Calculate how many days a review is overdue
+ * Uses IST timezone for consistency
  * 
  * @param weekStart - The week the review is for
  * @returns number - Days overdue (0 if not overdue)
@@ -83,9 +86,9 @@ export const getDaysOverdue = (weekStart: Date): number => {
   }
   
   const deadline = getReviewDeadline(weekStart);
-  const now = new Date();
+  const nowIST = getISTDate();
   
-  const diffMs = now.getTime() - deadline.getTime();
+  const diffMs = nowIST.getTime() - deadline.getTime();
   const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   
   return diffDays;
@@ -93,15 +96,16 @@ export const getDaysOverdue = (weekStart: Date): number => {
 
 /**
  * Get days remaining until deadline
+ * Uses IST timezone for consistency
  * 
  * @param weekStart - The week the review is for
  * @returns number - Days remaining (negative if overdue)
  */
 export const getDaysUntilDeadline = (weekStart: Date): number => {
   const deadline = getReviewDeadline(weekStart);
-  const now = new Date();
+  const nowIST = getISTDate();
   
-  const diffMs = deadline.getTime() - now.getTime();
+  const diffMs = deadline.getTime() - nowIST.getTime();
   const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
   
   return diffDays;

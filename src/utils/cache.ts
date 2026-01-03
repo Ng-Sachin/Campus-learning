@@ -3,6 +3,8 @@
  * Reduces redundant reads by caching frequently accessed data
  */
 
+import { logger } from './logger';
+
 interface CacheEntry<T> {
   data: T;
   timestamp: number;
@@ -26,19 +28,19 @@ class QueryCache {
     
     // Return cached data if valid
     if (cached && Date.now() - cached.timestamp < ttl) {
-      console.log(`📦 Cache HIT: ${key}`);
+      logger.debug(`📦 Cache HIT: ${key}`);
       return cached.data as T;
     }
 
     // If a fetch is already in-flight for this key, reuse it
     const existing = this.inFlight.get(key);
     if (existing) {
-      console.log(`⏳ Cache INFLIGHT: ${key} - Reusing ongoing fetch`);
+      logger.debug(`⏳ Cache INFLIGHT: ${key} - Reusing ongoing fetch`);
       return existing as Promise<T>;
     }
 
     // Fetch fresh data with coalescing
-    console.log(`🔄 Cache MISS: ${key} - Fetching from Firestore...`);
+    logger.debug(`🔄 Cache MISS: ${key} - Fetching from Firestore...`);
     const promise = (async () => {
       try {
         const data = await fetchFn();
@@ -62,7 +64,7 @@ class QueryCache {
    * Invalidate a specific cache key
    */
   invalidate(key: string): void {
-    console.log(`🗑️ Cache INVALIDATE: ${key}`);
+    logger.debug(`🗑️ Cache INVALIDATE: ${key}`);
     this.cache.delete(key);
   }
 
@@ -74,7 +76,7 @@ class QueryCache {
     const matchingKeys = keys.filter(key => key.includes(pattern));
     
     matchingKeys.forEach(key => {
-      console.log(`🗑️ Cache INVALIDATE: ${key}`);
+      logger.debug(`🗑️ Cache INVALIDATE: ${key}`);
       this.cache.delete(key);
     });
   }
@@ -83,7 +85,7 @@ class QueryCache {
    * Clear entire cache
    */
   clear(): void {
-    console.log('🗑️ Cache CLEAR ALL');
+    logger.debug('🗑️ Cache CLEAR ALL');
     this.cache.clear();
   }
 

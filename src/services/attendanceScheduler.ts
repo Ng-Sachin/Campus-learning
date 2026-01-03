@@ -9,6 +9,10 @@
 import { AttendanceTrackingService, DailyAttendanceStats, StudentDailyStatus } from './attendanceTrackingService';
 import { DiscordService } from './discordService';
 
+// Timezone configuration - India Standard Time (IST)
+const CAMPUS_TIMEZONE = 'Asia/Kolkata';
+const REPORT_HOUR_IST = 10; // 10:00 AM IST
+
 export class AttendanceScheduler {
   private static schedulerInterval: NodeJS.Timeout | null = null;
   private static isRunning = false;
@@ -63,21 +67,24 @@ export class AttendanceScheduler {
    */
   private static async checkAndSendReport(): Promise<void> {
     const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const seconds = now.getSeconds();
-    const todayDate = now.toISOString().split('T')[0];
+    
+    // Get current time in IST (India Standard Time)
+    const istTime = new Date(now.toLocaleString('en-US', { timeZone: CAMPUS_TIMEZONE }));
+    const hours = istTime.getHours();
+    const minutes = istTime.getMinutes();
+    const seconds = istTime.getSeconds();
+    const todayDate = istTime.toISOString().split('T')[0];
 
     // Log current time for debugging (only at the start of each minute)
     if (seconds === 0) {
-      console.log(`⏰ Scheduler check: ${hours}:${minutes.toString().padStart(2, '0')}`);
+      console.log(`⏰ Scheduler check (IST): ${hours}:${minutes.toString().padStart(2, '0')}`);
     }
 
-    // Send report at 10:00 AM (hours === 10 and minutes === 0)
+    // Send report at 10:00 AM IST (hours === REPORT_HOUR_IST and minutes === 0)
     // Only send once per day by checking lastReportDate
     // Also check if not already sending to prevent duplicates
-    if (hours === 10 && minutes === 0 && this.lastReportDate !== todayDate && !this.isSendingReport) {
-      console.log('⏰ It\'s 10:00 AM - Sending morning attendance reports...');
+    if (hours === REPORT_HOUR_IST && minutes === 0 && this.lastReportDate !== todayDate && !this.isSendingReport) {
+      console.log('⏰ It\'s 10:00 AM IST - Sending morning attendance reports...');
       this.isSendingReport = true; // Lock to prevent concurrent sends
       this.lastReportDate = todayDate; // Mark as sent for today
       
@@ -93,10 +100,18 @@ export class AttendanceScheduler {
   }
 
   /**
+   * Get current date in IST timezone
+   */
+  private static getISTDate(): Date {
+    const now = new Date();
+    return new Date(now.toLocaleString('en-US', { timeZone: CAMPUS_TIMEZONE }));
+  }
+
+  /**
    * Send attendance reports for all campuses
    */
   private static async sendAllCampusReports(): Promise<void> {
-    const today = new Date();
+    const today = this.getISTDate();
     const campuses = ['Dharamshala', 'Dantewada', 'Jashpur', 'Raigarh', 'Pune', 'Sarjapur', 'Kishanganj', 'Eternal'];
 
     try {

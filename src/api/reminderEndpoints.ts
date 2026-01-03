@@ -16,6 +16,7 @@
  */
 
 import { ReviewReminderService } from '../services/reviewReminderService';
+import { logger } from '../utils/logger';
 
 // Simple API key validation
 const API_KEY = process.env.REACT_APP_CRON_API_KEY || 'your-secret-api-key-here';
@@ -58,7 +59,7 @@ export async function handleSundayReminder(apiKey: string | null): Promise<ApiRe
       return createResponse(false, 'Unauthorized', undefined, 'Invalid API key');
     }
 
-    console.log('[API] Triggering Sunday reminder...');
+    logger.info('[API] Triggering Sunday reminder...');
     const result = await ReviewReminderService.sendSundayReminder();
 
     return createResponse(
@@ -71,7 +72,7 @@ export async function handleSundayReminder(apiKey: string | null): Promise<ApiRe
       }
     );
   } catch (error) {
-    console.error('[API] Error in Sunday reminder:', error);
+    logger.error('[API] Error in Sunday reminder:', error);
     return createResponse(
       false,
       'Failed to send Sunday reminder',
@@ -91,7 +92,7 @@ export async function handleMondayMorningReminder(apiKey: string | null): Promis
       return createResponse(false, 'Unauthorized', undefined, 'Invalid API key');
     }
 
-    console.log('[API] Triggering Monday morning reminder...');
+    logger.info('[API] Triggering Monday morning reminder...');
     const result = await ReviewReminderService.sendMondayMorningReminder();
 
     return createResponse(
@@ -104,7 +105,7 @@ export async function handleMondayMorningReminder(apiKey: string | null): Promis
       }
     );
   } catch (error) {
-    console.error('[API] Error in Monday morning reminder:', error);
+    logger.error('[API] Error in Monday morning reminder:', error);
     return createResponse(
       false,
       'Failed to send Monday morning reminder',
@@ -124,7 +125,7 @@ export async function handleMondayEveningReminder(apiKey: string | null): Promis
       return createResponse(false, 'Unauthorized', undefined, 'Invalid API key');
     }
 
-    console.log('[API] Triggering Monday evening reminder...');
+    logger.info('[API] Triggering Monday evening reminder...');
     const result = await ReviewReminderService.sendMondayEveningReminder();
 
     return createResponse(
@@ -137,7 +138,7 @@ export async function handleMondayEveningReminder(apiKey: string | null): Promis
       }
     );
   } catch (error) {
-    console.error('[API] Error in Monday evening reminder:', error);
+    logger.error('[API] Error in Monday evening reminder:', error);
     return createResponse(
       false,
       'Failed to send Monday evening reminder',
@@ -157,7 +158,7 @@ export async function handleOverdueReminder(apiKey: string | null): Promise<ApiR
       return createResponse(false, 'Unauthorized', undefined, 'Invalid API key');
     }
 
-    console.log('[API] Triggering overdue reminder...');
+    logger.info('[API] Triggering overdue reminder...');
     const result = await ReviewReminderService.sendOverdueReminder();
 
     return createResponse(
@@ -170,7 +171,7 @@ export async function handleOverdueReminder(apiKey: string | null): Promise<ApiR
       }
     );
   } catch (error) {
-    console.error('[API] Error in overdue reminder:', error);
+    logger.error('[API] Error in overdue reminder:', error);
     return createResponse(
       false,
       'Failed to send overdue reminder',

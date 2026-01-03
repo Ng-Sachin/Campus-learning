@@ -12,6 +12,7 @@ import {
 } from 'firebase/firestore';
 import { db } from './firebase';
 import { User, DailyGoal, DailyReflection, Attendance } from '../types';
+import { getISTStartOfDay, getISTEndOfDay } from '../utils/timezone';
 
 export interface DailyAttendanceStats {
   date: Date;
@@ -50,15 +51,19 @@ export interface MenteeInfo {
 export class AttendanceTrackingService {
   /**
    * Get daily attendance statistics for admin dashboard
+   * Uses IST timezone for consistency across all users
    */
   static async getDailyStats(date: Date, campus?: string): Promise<DailyAttendanceStats> {
     try {
+      // Ensure date is treated as IST for consistent filtering
+      const istDate = getISTStartOfDay(date);
+      
       // Get all active students (exclude admins, inactive users)
       const activeStudents = await this.getActiveStudents(campus);
       const totalActiveStudents = activeStudents.length;
 
       // Get students on approved leave for this date (with leave type)
-      const studentsOnLeaveData = await this.getStudentsOnLeaveWithType(activeStudents.map(s => s.id), date);
+      const studentsOnLeaveData = await this.getStudentsOnLeaveWithType(activeStudents.map(s => s.id), istDate);
       
       // Also check for students with status set to kitchen_leave, on_leave, or unapproved_leave
       const studentsWithLeaveStatus = activeStudents.filter(s => 
@@ -82,17 +87,17 @@ export class AttendanceTrackingService {
       const studentsOnRegularLeave = Array.from(leaveMap.values()).filter(t => t === 'on_leave').length;
       const studentsOnUnapprovedLeave = Array.from(leaveMap.values()).filter(t => t === 'unapproved_leave').length;
 
-      // Get approved goals for the date
+      // Get approved goals for the date (using IST)
       const approvedGoals = await this.getApprovedGoalsForDate(
         activeStudents.map(s => s.id), 
-        date
+        istDate
       );
       const studentsWithApprovedGoals = new Set(approvedGoals.map(g => g.student_id)).size;
 
-      // Get submitted reflections for the date
+      // Get submitted reflections for the date (using IST)
       const submittedReflections = await this.getSubmittedReflectionsForDate(
         activeStudents.map(s => s.id), 
-        date
+        istDate
       );
       const studentsWithSubmittedReflections = new Set(submittedReflections.map(r => r.student_id)).size;
 
@@ -103,7 +108,7 @@ export class AttendanceTrackingService {
       const eligibleStudents = totalActiveStudents - studentsOnLeave;
       
       return {
-        date,
+        date: istDate,
         totalActiveStudents,
         studentsWithApprovedGoals,
         studentsWithSubmittedReflections,
@@ -118,8 +123,9 @@ export class AttendanceTrackingService {
       };
     } catch (error) {
       console.error('Error fetching daily attendance stats:', error);
+      const istDate = getISTStartOfDay(date);
       return {
-        date,
+        date: istDate,
         totalActiveStudents: 0,
         studentsWithApprovedGoals: 0,
         studentsWithSubmittedReflections: 0,

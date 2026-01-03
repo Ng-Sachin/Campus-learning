@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useCallback, useRef } from 'react';
+import { logger } from '../utils/logger';
 
 interface CacheEntry<T> {
   data: T;
@@ -37,7 +38,7 @@ export const DataCacheProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     // Check if there's already a pending request for this key
     const pendingRequest = pendingRequests.current.get(key);
     if (pendingRequest) {
-      console.log(`[Cache] Reusing pending request for: ${key}`);
+      logger.debug(`[Cache] Reusing pending request for: ${key}`);
       return pendingRequest;
     }
 
@@ -46,7 +47,7 @@ export const DataCacheProvider: React.FC<{ children: React.ReactNode }> = ({ chi
     const now = Date.now();
 
     if (cachedEntry && (now - cachedEntry.timestamp) < ttl) {
-      console.log(`[Cache] HIT (memory) for: ${key}, age: ${Math.round((now - cachedEntry.timestamp) / 1000)}s`);
+      logger.debug(`[Cache] HIT (memory) for: ${key}, age: ${Math.round((now - cachedEntry.timestamp) / 1000)}s`);
       return cachedEntry.data as T;
     }
 
@@ -59,7 +60,7 @@ export const DataCacheProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         const parsedEntry: CacheEntry<T> = JSON.parse(localStorageItem);
         
         if ((now - parsedEntry.timestamp) < ttl) {
-          console.log(`[Cache] HIT (localStorage) for: ${key}, age: ${Math.round((now - parsedEntry.timestamp) / 1000)}s`);
+          logger.debug(`[Cache] HIT (localStorage) for: ${key}, age: ${Math.round((now - parsedEntry.timestamp) / 1000)}s`);
           
           // Restore to memory cache
           memoryCache.set(key, parsedEntry);
@@ -70,11 +71,11 @@ export const DataCacheProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         }
       }
     } catch (error) {
-      console.warn('[Cache] Error reading from localStorage:', error);
+      logger.warn('[Cache] Error reading from localStorage:', error);
     }
 
     // Cache miss - fetch fresh data
-    console.log(`[Cache] MISS for: ${key}, fetching fresh data...`);
+    logger.debug(`[Cache] MISS for: ${key}, fetching fresh data...`);
     
     const fetchPromise = fetchFn()
       .then((data) => {
@@ -92,7 +93,7 @@ export const DataCacheProvider: React.FC<{ children: React.ReactNode }> = ({ chi
           const localStorageKey = `cache_${key}`;
           localStorage.setItem(localStorageKey, JSON.stringify(entry));
         } catch (error) {
-          console.warn('[Cache] Error writing to localStorage:', error);
+          logger.warn('[Cache] Error writing to localStorage:', error);
         }
 
         // Remove from pending requests
@@ -118,16 +119,16 @@ export const DataCacheProvider: React.FC<{ children: React.ReactNode }> = ({ chi
    */
   const invalidateCache = useCallback((key?: string) => {
     if (key) {
-      console.log(`[Cache] Invalidating cache for: ${key}`);
+      logger.debug(`[Cache] Invalidating cache for: ${key}`);
       memoryCache.delete(key);
       
       try {
         localStorage.removeItem(`cache_${key}`);
       } catch (error) {
-        console.warn('[Cache] Error removing from localStorage:', error);
+        logger.warn('[Cache] Error removing from localStorage:', error);
       }
     } else {
-      console.log('[Cache] Invalidating all cache');
+      logger.debug('[Cache] Invalidating all cache');
       memoryCache.clear();
       
       // Clear all cache items from localStorage

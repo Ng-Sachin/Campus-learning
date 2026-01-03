@@ -5,6 +5,10 @@ import { DataCacheProvider } from './contexts/DataCacheContext';
 import { ClientReminderScheduler } from './services/clientReminderScheduler';
 import { AttendanceScheduler } from './services/attendanceScheduler';
 import { LeaveScheduler } from './services/leaveScheduler';
+import { ErrorBoundary } from './components/Common/ErrorBoundary';
+import { logger } from './utils/logger';
+import { healthMonitor } from './utils/healthCheck';
+import { ENV } from './config/environment';
 
 // Common Components
 import ProtectedRoute from './components/Common/ProtectedRoute';
@@ -64,33 +68,47 @@ const NotFound = () => (
 function App() {
   // Initialize the client-side reminder scheduler, attendance scheduler, and leave scheduler
   useEffect(() => {
-    console.log('[App] Initializing review reminder scheduler...');
+    logger.info('[App] Initializing application...', { environment: ENV.isProduction ? 'production' : 'development' });
+    
+    // Start health monitoring in production
+    if (ENV.isProduction) {
+      healthMonitor.start(300000); // Check every 5 minutes
+      healthMonitor.subscribe((result) => {
+        if (result.status !== 'healthy') {
+          logger.warn('[App] Health check warning', result);
+        }
+      });
+    }
+    
+    logger.info('[App] Initializing review reminder scheduler...');
     const scheduler = ClientReminderScheduler.getInstance();
     scheduler.start();
     
-    console.log('[App] Initializing attendance scheduler...');
+    logger.info('[App] Initializing attendance scheduler...');
     AttendanceScheduler.startScheduler();
     
-    console.log('[App] Initializing leave scheduler...');
+    logger.info('[App] Initializing leave scheduler...');
     LeaveScheduler.start();
     
     return () => {
       // Cleanup schedulers
-      console.log('[App] App unmounting, stopping schedulers...');
+      logger.info('[App] App unmounting, stopping schedulers...');
       AttendanceScheduler.stopScheduler();
       LeaveScheduler.stop();
+      healthMonitor.stop();
     };
   }, []);
 
   return (
-    <Router>
-      <AuthProvider>
-        <DataCacheProvider>
-          <div className="App">
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/login" element={<Login />} />
-              <Route path="/unauthorized" element={<Unauthorized />} />
+    <ErrorBoundary>
+      <Router>
+        <AuthProvider>
+          <DataCacheProvider>
+            <div className="App">
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/login" element={<Login />} />
+                <Route path="/unauthorized" element={<Unauthorized />} />
             
             {/* Protected Routes */}
             <Route path="/" element={
@@ -283,7 +301,8 @@ function App() {
           </div>
         </DataCacheProvider>
       </AuthProvider>
-    </Router>
+      </Router>
+    </ErrorBoundary>
   );
 }
 
