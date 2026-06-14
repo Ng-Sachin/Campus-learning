@@ -1,8 +1,17 @@
 {
-  "generatedAt": "2026-02-07T06:14:55.466Z",
+  "generatedAt": "2026-06-14T05:04:04.478Z",
   "version": "0.1.0",
   "features": {
     "all": [
+      {
+        "id": "feature-9c35fee2",
+        "title": "Add forced weekly review modal for mentor and mentee",
+        "description": "Add forced weekly review modal for mentor and mentee",
+        "status": "released",
+        "dateAdded": "2026-06-13",
+        "commitHash": "9c35fee2c535b32a116d53a7fc2fd9e023218176",
+        "author": "Code-BySachin"
+      },
       {
         "id": "feature-f0f745db",
         "title": "Added leave management logic and user seeding",
@@ -202,18 +211,18 @@
         "dateAdded": "2025-10-15",
         "commitHash": "e87fc669d331de5a652be322df867e735a661423",
         "author": "Mubin"
-      },
-      {
-        "id": "feature-53221fd1",
-        "title": "Add profile completion modal for incomplete user profiles",
-        "description": "Add profile completion modal for incomplete user profiles",
-        "status": "released",
-        "dateAdded": "2025-10-07",
-        "commitHash": "53221fd1038c4952d7d22f58a9654b7d88a0334d",
-        "author": "Mubin"
       }
     ],
     "released": [
+      {
+        "id": "feature-9c35fee2",
+        "title": "Add forced weekly review modal for mentor and mentee",
+        "description": "Add forced weekly review modal for mentor and mentee",
+        "status": "released",
+        "dateAdded": "2026-06-13",
+        "commitHash": "9c35fee2c535b32a116d53a7fc2fd9e023218176",
+        "author": "Code-BySachin"
+      },
       {
         "id": "feature-f0f745db",
         "title": "Added leave management logic and user seeding",
@@ -392,15 +401,6 @@
         "status": "released",
         "dateAdded": "2025-10-15",
         "commitHash": "e87fc669d331de5a652be322df867e735a661423",
-        "author": "Mubin"
-      },
-      {
-        "id": "feature-53221fd1",
-        "title": "Add profile completion modal for incomplete user profiles",
-        "description": "Add profile completion modal for incomplete user profiles",
-        "status": "released",
-        "dateAdded": "2025-10-07",
-        "commitHash": "53221fd1038c4952d7d22f58a9654b7d88a0334d",
         "author": "Mubin"
       }
     ],

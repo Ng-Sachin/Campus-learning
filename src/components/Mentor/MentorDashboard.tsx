@@ -16,12 +16,12 @@ import {
   ArrowRight,
   UserCheck,
   GraduationCap,
-  Star,
-  AlertCircle
+  Star
 } from 'lucide-react';
 import MentorCampusTab from '../Admin/MentorCampusTab';
 import { SpinnerLoader } from '../Common/BoltLoaderComponent';
 import CampusJoiningDateModal from '../Common/CampusJoiningDateModal';
+import ForcedWeeklyReviewModal from '../Common/ForcedWeeklyReviewModal';
 import { calculateReviewScore } from '../../utils/reviewCalculations';
 
 type ViewTypeValues = 'my-goals' | 'my-mentees' | 'my-mentor' | 'campus-overview';
@@ -55,8 +55,8 @@ const MentorDashboard: React.FC = () => {
   });
   const [loading, setLoading] = useState(true);
   const [showJoiningDateModal, setShowJoiningDateModal] = useState(false);
-  const [showReviewReminder, setShowReviewReminder] = useState(false);
-  const [pendingReviewCount, setPendingReviewCount] = useState(0);
+  // Forced review modal: list of mentees whose weekly review is still pending
+  const [pendingMenteeTargets, setPendingMenteeTargets] = useState<{ id: string; name: string }[]>([]);
 
 
   const handleJoiningDateUpdated = useCallback((updatedUser: User) => {
@@ -234,12 +234,11 @@ const MentorDashboard: React.FC = () => {
 
       setMenteeOverviews(overviews);
 
-      // Check for pending reviews and show reminder
-      const pendingReviews = overviews.filter(overview => overview.weekly_review_status === 'pending').length;
-      if (pendingReviews > 0) {
-        setPendingReviewCount(pendingReviews);
-        setShowReviewReminder(true);
-      }
+      // Collect pending mentee targets for forced review modal
+      const pendingTargets = overviews
+        .filter(o => o.weekly_review_status !== 'completed')
+        .map(o => ({ id: o.student.id, name: o.student.name }));
+      setPendingMenteeTargets(pendingTargets);
 
     } catch (error) {
       console.error('Error loading dashboard data:', error);
@@ -694,42 +693,17 @@ const MentorDashboard: React.FC = () => {
         />
       )}
 
-      {/* Review Reminder Modal */}
-      {showReviewReminder && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <div className="flex items-center mb-4">
-              <div className="p-2 bg-yellow-100 rounded-lg">
-                <AlertCircle className="h-6 w-6 text-yellow-600" />
-              </div>
-              <h3 className="text-lg font-semibold text-gray-900 ml-3">Weekly Review Reminder</h3>
-            </div>
-
-            <p className="text-gray-600 mb-6">
-              You have <span className="font-semibold text-yellow-600">{pendingReviewCount}</span> mentee{pendingReviewCount > 1 ? 's' : ''}
-              who need{pendingReviewCount === 1 ? 's' : ''} their weekly performance review.
-              Reviews are due every Saturday.
-            </p>
-
-            <div className="flex space-x-3">
-              <button
-                onClick={() => setShowReviewReminder(false)}
-                className="flex-1 px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
-              >
-                Remind Me Later
-              </button>
-              <button
-                onClick={() => {
-                  setShowReviewReminder(false);
-                  setCurrentView(VIEW_TYPES.MY_MENTEES);
-                }}
-                className="flex-1 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-              >
-                Review Now
-              </button>
-            </div>
-          </div>
-        </div>
+      {/* ── Forced Weekly Review Modal (replaces soft reminder) ── */}
+      {pendingMenteeTargets.length > 0 && (
+        <ForcedWeeklyReviewModal
+          reviewType="mentee"
+          reviewTargets={pendingMenteeTargets}
+          onAllReviewsComplete={() => {
+            setPendingMenteeTargets([]);
+            // Refresh mentee overviews so review badges update
+            loadDashboardData();
+          }}
+        />
       )}
     </>
   );

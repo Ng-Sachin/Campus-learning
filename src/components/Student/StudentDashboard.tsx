@@ -15,6 +15,7 @@ import {
 import { UserService } from '../../services/firestore';
 import MentorBrowser from './MentorBrowser';
 import ReviewDeadlineEnforcement from './ReviewDeadlineEnforcement';
+import ForcedWeeklyReviewModal from '../Common/ForcedWeeklyReviewModal';
 import {
   DailyGoal,
   DailyReflection,
@@ -84,6 +85,8 @@ const StudentDashboard: React.FC = () => {
   const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [showMentorReviewModal, setShowMentorReviewModal] = useState(false);
+  // Forced weekly review modal — shown when mentor review not yet submitted this week
+  const [showForcedReviewModal, setShowForcedReviewModal] = useState(false);
   /* Removed unused selectedReviewerId */
   const [mentorReview, setMentorReview] = useState<MentorReviewForm>({
     morningExercise: 0,
@@ -321,6 +324,10 @@ const StudentDashboard: React.FC = () => {
             weekStart       // week_start (Monday midnight)
           );
           setHasSubmittedMentorReviewThisWeek(hasSubmitted);
+          // Show forced modal if review not yet done this week
+          if (!hasSubmitted) {
+            setShowForcedReviewModal(true);
+          }
           console.log(`✅ [StudentDashboard] Mentor review submitted this week: ${hasSubmitted}`);
         }
       } catch (error) {
@@ -429,6 +436,17 @@ const StudentDashboard: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      {/* ── Forced Weekly Review Modal ── */}
+      {showForcedReviewModal && mentorData && (
+        <ForcedWeeklyReviewModal
+          reviewType="mentor"
+          reviewTargets={[{ id: mentorData.id, name: mentorData.name }]}
+          onAllReviewsComplete={() => {
+            setShowForcedReviewModal(false);
+            setHasSubmittedMentorReviewThisWeek(true);
+          }}
+        />
+      )}
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
